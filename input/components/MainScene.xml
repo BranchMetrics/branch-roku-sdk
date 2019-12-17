@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs"/>
+    <!-- Replace with correct path if necessary -->
+    <script type="text/brightscript" uri="pkg:/source/libs/BranchSdkLibrary.brs"/>
+
+    <children>
+        <Group>
+          <Label translation = "[0, 100]" text="Branch SDK Test Application" horizAlign="center" vertAlign="center" width="1920" height="90" Color="#FFFFFF" />
+          <Poster uri="pkg:/images/branchlogo.png" translation = "[ 1400, 80 ]" width="350" height="152"/>
+          <LayoutGroup translation = "[50, 280]" itemSpacings = "[10]" layoutDirection = "horiz" >
+              <Label id="lSessionApiResult" text="Session Api Result : " horizAlign="center" vertAlign="center" width="400" height="90" Color="#eb9b34" />
+              <Label id="lSessionApiResultDetails" text="Session API result will be displayed here" horizAlign="left" vertAlign="center" width="1000" height="300" Color="#eb9b34" wrap="true" maxLines="6" />
+          </LayoutGroup>
+
+          <LayoutGroup translation = "[710, 650]" itemSpacings = "[50]" layoutDirection = "vert" >
+              <Button id="bSetIdentity" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
+                  <Label id="lClose" text="SetIdentity" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              </Button>
+              <Button id="bLogEventPurchase" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
+                  <Label id="lClose" text="LogEventPurchase" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              </Button>
+              <Button id="bLogEventCustom" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
+                  <Label id="lClose" text="LogEventCustom" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              </Button>
+            </LayoutGroup>
+        </Group>
+    </children>
+</component>

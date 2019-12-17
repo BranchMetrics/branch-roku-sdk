@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="BranchSdkTask" extends="Task">
+    <!-- Replace with correct path if necessary -->
+    <script type="text/brightscript" uri="BranchSdkTask.brs"/>
+    <!-- Replace with correct path if necessary -->
+    <script type="text/brightscript" uri="pkg:/source/libs/BranchSdkLibrary.brs"/>
+
+    <interface>
+        <field id="callBranchApi" type="assocarray"/>
+    </interface>
+</component>

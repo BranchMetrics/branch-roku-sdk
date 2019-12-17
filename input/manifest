@@ -1,0 +1,13 @@
+title=Branch SDK Sample Application
+major_version=1
+minor_version=0
+build_version=1
+mm_icon_focus_hd=pkg:/images/icon_focus_hd.png
+mm_icon_focus_sd=pkg:/images/icon_focus_sd.png
+mm_icon_focus_fhd=pkg:/images/icon_focus_fhd.png
+splash_screen_fhd=pkg:/images/splash_fhd.png
+splash_screen_hd=pkg:/images/splash_hd.png
+splash_screen_sd=pkg:/images/splash_sd.png
+splash_color=#000000
+splash_min_time=1500
+ui_resolutions=fhd
