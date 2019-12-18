@@ -7,36 +7,35 @@ sub init()
     print "Initializing the task"
     m.port = createObject("roMessagePort")
     m.top.observeField("callBranchApi", m.port)
-    m.top.functionName = "setupRunLoop"
+    m.top.functionName = "setupApiLoop"
     m.top.control = "RUN"
 end sub
 
-sub setupRunLoop()
+sub setupApiLoop()
     options = m.global.branchSdkConfig
     print "===> Starting Branch SDK Main Task Loop : "
     StartBranchSdk(options, m.port)
-    m.branchSdk = GetBranchSdk()
+    m.branchSdkInstance = GetBranchSdk()
     while true
-        msg = wait(10*1000, m.port)
+        msg = wait(20*1000, m.port)
         printCurrentTime()
         ' Timer event to start uploading process
         if (msg = invalid) then
-            m.branchSdk.networking.processTimeOutMessages()
-            m.branchSdk.networking.processUploads()
+            m.branchSdkInstance.networking.processTimeOutMessages()
+            m.branchSdkInstance.networking.processUploads()
         else
             mt = type(msg)
 
             ' Event for calling API
             if mt = "roSGNodeEvent"
                 if msg.getField()=BranchSdkConstants().TASK_EVENT_FIELDS.CALL_BRANCH_API
-                    executeApiCall(msg.getData())
+                    executeBranchApi(msg.getData())
                 end if
             ' Event for API response
             else if (mt = "roUrlEvent")
-                print "setupRunLoop : roUrlEvent msg getSourceIdentity " msg.getSourceIdentity()
-                if m.branchSdk.isBranchSdkEvent(msg.getSourceIdentity())
-                    sourceMessage = m.branchSdk.networking.pendingTransfers[msg.getSourceIdentity().tostr()]
-                    response = m.branchSdk.onUrlEvent(msg)
+                if m.branchSdkInstance.isBranchSdkEvent(msg.getSourceIdentity())
+                    sourceMessage = m.branchSdkInstance.networking.pendingTransfers[msg.getSourceIdentity().tostr()]
+                    response = m.branchSdkInstance.onUrlEvent(msg)
                     if (response <> invalid) then
                         if (sourceMessage <> invalid) then
                             m.top[sourceMessage.request.callbackField] = response
@@ -65,13 +64,13 @@ function printCurrentTime()
     end if
 end function
 
-function executeApiCall(apiCall as Object)
+function executeBranchApi(apiCall as Object)
     args = apiCall.args
     length = args.count()
-    target = m.branchSdk
+    target = m.branchSdkInstance
     methodName = apiCall.methodName
 
-    print "===> executeApiCall : methodName " methodName
+    print "===> executeBranchApi : methodName " methodName
 
     if (length = 0) then
         target[methodName]()
