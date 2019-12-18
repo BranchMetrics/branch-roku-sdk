@@ -1,12 +1,3 @@
-# Main outstanding tasks before v1.0.0
-
-- [ ] Scoping all params by Branch Key
-
-Smaller fixes we'd like:
-
-- [ ] `setPreinstalldata` -> `setPreinstallData`
-- [ ] `SetIdentity` -> `setIdentity`
-
 # Overview
 
 The Branch Roku SDK enables:
@@ -17,6 +8,15 @@ The Branch Roku SDK enables:
 5. Event tracking
 6. Preinstall tracking
 7. Logging out users
+
+# Main outstanding tasks
+
+- [ ] Scoping all params by Branch Key
+
+Smaller fixes we'd like:
+
+- [ ] `setPreinstalldata` -> `setPreinstallData`
+- [ ] `SetIdentity` -> `setIdentity`
 
 # Quickstart to our test app
 
