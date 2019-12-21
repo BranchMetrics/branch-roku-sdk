@@ -24,7 +24,7 @@ end sub
 sub ConfigureBranchSdk(screen as dynamic)
     options = {}
     ' For future use for advance features in Branch SDK'
-    options.branchKey = "key_live_TODO_YOUR_BRANCH_KEY_HERE"
+    options.branchKey = "key_live_leQPfBKv29C2cfSj75oWSmkgtFn6u3M1"
     options.logLevel = BranchSdkConstants().LOG_LEVEL.ALL
     options.environment = BranchSdkConstants().ENVIRONMENT.PRODUCTION
 
