@@ -18,15 +18,14 @@ sub init()
     m.bInitSession.setFocus(true)
 
     print "MainScene : Initializing"
-    print "MainScene : Creating Task"
     print "MainScene : Creating CreateBranchSdkForSceneGraphApp"
 
     ' BRANCH SDK INTEGRATION - Create Instance'
     m.branchSdkObj = CreateBranchSdkForSceneGraphApp()
 
-    print "MainScene : initSession"
+    print "MainScene : setPreinstallData"
     ' BRANCH SDK INTEGRATION - Call API'
-    m.branchSdkObj.setPreinstalldata("MyCampaign", "MyPartner")
+    m.branchSdkObj.setPreinstallData("MyCampaign", "MyPartner")
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
@@ -121,7 +120,7 @@ end sub
 sub SetIdentity_Clicked()
     print "Calling Branch SetIdentity API"
     ' BRANCH SDK INTEGRATION - Call API'
-    m.branchSdkObj.SetIdentity("User123", "OnSetIdentityCallbackFunc")
+    m.branchSdkObj.setIdentity("User123", "OnSetIdentityCallbackFunc")
 end sub
 
 sub LogEventPurchase_Clicked()

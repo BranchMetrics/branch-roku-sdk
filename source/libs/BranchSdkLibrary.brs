@@ -496,6 +496,13 @@ function StartBranchSdk(options as object, messagePort as object)
                                             if (responseObject.DoesExist("identity_id")) then
                                                 registry.setIdentityId(responseObject.identity_id)
                                             end if
+                                        else if (sourceMessage.request.method = "logout") then
+                                            if (responseObject.DoesExist("identity_id")) then
+                                                registry.setIdentityId(responseObject.identity_id)
+                                            end if
+                                            if (responseObject.DoesExist("session_id")) then
+                                                registry.setSessionId(responseObject.session_id)
+                                            end if
                                         else if (sourceMessage.request.method = "logEvent") then
                                             ' Caching None
                                         end if
@@ -572,21 +579,32 @@ function StartBranchSdk(options as object, messagePort as object)
         return instance
     end function
 
-    CreateBranchRegistryManager = function()
+    CreateBranchRegistryManager = function(initParams as object)
         registry = {}
-        'channels can share registry when packaged by the same developer token
-        'token, so include the channel ID
+        'Registry Section = Prefix + BranchKey + ChannelId
         appInfo = CreateObject("roAppInfo")
+        registryNamePrefix = "BranchSdk_registry"
+        branchKey = ""
+        if (initParams.DoesExist("branchKey") and type(initParams.branchKey) <> "roString" and initParams.branchKey <> "") then
+            branchKey = initParams.branchKey
+        end if
+
+        sectionName = registryNamePrefix
+        if (initParams.branchKey <> invalid) then
+            sectionName = sectionName + "_" + initParams.branchKey
+        end if
+
+        sectionName = sectionName + "_" + appInfo.getid()
         registry.keys = {
-            MAIN_SECTION_PREFIX: "BranchSdk_registry_"
-            SECTION_NAME: "BranchSdk_registry_" + appInfo.getid(),
-            BRANCH_KEY: "branch_key",
+            MAIN_SECTION_PREFIX: registryNamePrefix
+            SECTION_NAME: sectionName,
             DEVELOPER_IDENTITY: "developer_identity",
             DEVICE_FINGERPRINT_ID: "device_fingerprint_id",
             IDENTITY_ID: "identity_id",
             SESSION_ID: "session_id"
             IS_FIRST_TIME: "isFirstTime"
         }
+        print "registry.keys.SECTION_NAME : " registry.keys.SECTION_NAME
         registry.section = CreateObject("roRegistrySection", registry.keys.SECTION_NAME)
 
         registry.printAll = function() as void
@@ -984,12 +1002,12 @@ function StartBranchSdk(options as object, messagePort as object)
     ' Branch SDK API's
     '
     branchSdkApi = {
-        setPreinstalldata: function(campaign = "", partner = "") as void
-                                print "branchSdkApi : setPreinstalldata "
+        setPreinstallData: function(campaign = "", partner = "") as void
+                                print "branchSdkApi : setPreinstallData "
                                 registry = GetBranchSdk().registry
                                 isFirstTime = registry.getIsFirstTime()
 
-                                print "branchSdkApi : setPreinstalldata isFirstTime " isFirstTime
+                                print "branchSdkApi : setPreinstallData isFirstTime " isFirstTime
                                 if (isFirstTime) then
                                     params = GetBranchSdk().params
                                     params.AddReplace("preinstall_campaign", campaign)
@@ -1043,7 +1061,7 @@ function StartBranchSdk(options as object, messagePort as object)
         logger:         CreateBranchPrintLogger(options),
         configuration:  CreateBranchConfiguration(options),
         networking:     CreateBranchNetworking(options, messagePort),
-        registry:       CreateBranchRegistryManager(),
+        registry:       CreateBranchRegistryManager(options),
         appInfo:        CreateBranchApplicationInfo(),
         deviceInfo:     CreateBranchDeviceInfo(),
         params:         {}
@@ -1059,9 +1077,9 @@ function CreateBranchSdkForSceneGraphApp() as object
     return {
         callbackCounter:    99997,
         branchSdkTask:      task,
-        setPreinstalldata:  function(campaign = "", partner = "") as void
-                                print "CreateBranchSdkForSceneGraphApp setPreinstalldata : "
-                                m.invokeFunction("setPreinstalldata", [campaign, partner])
+        setPreinstallData:  function(campaign = "", partner = "") as void
+                                print "CreateBranchSdkForSceneGraphApp setPreinstallData : "
+                                m.invokeFunction("setPreinstallData", [campaign, partner])
                             end function,
         initSession:        function(uri = "", callbackFunc = "") as void
                                 callbackField = m.setCallbackField(callbackFunc)
