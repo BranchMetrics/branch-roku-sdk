@@ -9,15 +9,6 @@ The Branch Roku SDK enables:
 6. Preinstall tracking
 7. Logging out users
 
-# Main outstanding tasks
-
-- [ ] Scoping all params by Branch Key
-
-Smaller fixes we'd like:
-
-- [ ] `setPreinstalldata` -> `setPreinstallData`
-- [ ] `SetIdentity` -> `setIdentity`
-
 # Quickstart to our test app
 
 To test out this app, open `./input/source/libs/Main.brs` and modify the following line:
@@ -38,28 +29,21 @@ Note: you can use telnet to view your Roku device logs: `telnet ROKU_LOCAL_IP 80
 
 ```
 ├── README.md
-├── input
-│   ├── components
-│   │   ├── MainScene.brs
-│   │   ├── MainScene.xml
-│   │   └── tasks
-│   │       ├── BranchSdkTask.brs
-│   │       └── BranchSdkTask.xml
-│   ├── images
-│   │   ├── branchlogo.png
-│   │   ├── icon_focus_fhd.png
-│   │   ├── icon_focus_hd.png
-│   │   ├── icon_focus_sd.png
-│   │   ├── splash_fhd.png
-│   │   ├── splash_hd.png
-│   │   └── splash_sd.png
-│   ├── manifest
-│   └── source
-│       ├── Main.brs
-│       └── libs
-│           └── BranchSdkLibrary.brs
-└── output
-    └── BranchSdkSampleApplication-RokuSceneGraph.zip
+├── components
+│   ├── MainScene.brs
+│   ├── MainScene.xml
+│   └── tasks
+│       ├── BranchSdkTask.brs
+│       └── BranchSdkTask.xml
+├── images
+│   └── ...
+├── manifest
+├── out
+│   └── branch-roku-sdk.zip
+└── source
+    ├── Main.brs
+    └── libs
+        └── BranchSdkLibrary.brs
 ```
 
 # Integration guide
