@@ -3,14 +3,19 @@
 '*************************************************************
 
 sub Main(args as dynamic)
-    print "in showChannelSGScreen"
+    print "Main ShowChannelSGScreen args : " args
     screen = CreateObject("roSGScreen")
-    m.port = CreateObject("roMessagePort")
-    screen.setMessagePort(m.port)
-    scene = screen.CreateScene("MainScene")
-    screen.show()
 
     ConfigureBranchSdk(screen)
+
+    m.port = CreateObject("roMessagePort")
+    screen.setMessagePort(m.port)
+    screen.CreateScene("MainScene")
+    screen.show()
+
+    if (args <> invalid and (args.contentId <> invalid or args.mediatype <> invalid)) then
+        screen.getGlobalNode().addFields({launchArgs: args})
+    end if
 
     while(true)
         msg = wait(0, m.port)
@@ -25,7 +30,7 @@ sub ConfigureBranchSdk(screen as dynamic)
     options = {}
     ' For future use for advance features in Branch SDK'
     options.branchKey = "key_live_leQPfBKv29C2cfSj75oWSmkgtFn6u3M1"
-    options.logLevel = BranchSdkConstants().LOG_LEVEL.ALL
+    options.logLevel = BranchSdkConstants().LOG_LEVEL.DEBUG
     options.environment = BranchSdkConstants().ENVIRONMENT.PRODUCTION
 
     ' Set Branch SDK congiguration parameter as required

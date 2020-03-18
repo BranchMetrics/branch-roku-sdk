@@ -42,6 +42,7 @@ function BranchSdkConstants() as object
 
     API_URLS = {
         sessionUrl:             "https://api2.branch.io/v1/open",
+        handleInputUrl:         "https://api2.branch.io/v1/open",
         profileUrl:             "https://api2.branch.io/v1/profile",
         standardEventUrl:       "https://api2.branch.io/v2/event/standard",
         customEventUrl:         "https://api2.branch.io/v2/event/custom",
@@ -281,7 +282,7 @@ end function
 '
 function GetBranchSdk() as object
     if (getGlobalAA().branchSdkInstance = invalid) then
-        print "Branch SDK: GetBranchSdk() called before staring mainloop,  StartBranchSdk!"
+        print "*** Error *** Branch SDK is not created yet! Call StartBranchSdk first."
     end if
 
     return getGlobalAA().branchSdkInstance
@@ -291,25 +292,23 @@ end function
 ' Initialize Branch SDK as per your required configuration parameters
 ' See BranchSdkConstants().DEFAULT_CONFIG for other available configuration parameters
 '
-function StartBranchSdk(options as object, messagePort as object)
-    print "StartBranchSdk : "
+sub StartBranchSdk(options as object, messagePort as object)
     if (getGlobalAA().branchSdkInstance <> invalid) then
         branchPrintLogger = GetBranchSdk().logger
         branchPrintLogger.info("StartBranchSdk called more then once.")
-        return GetBranchSdk()
+        return
     end if
 
-    CreateBranchUtilities = function(initParams as object) as object
-        print "CreateBranchUtilities"
+    CreateBranchUtilities = function() as object
         instance = {
-            GetTimeInMilliSeconds : function() as longinteger
+            GetTimeInMilliSeconds: function() as longinteger
                 date = CreateObject("roDateTime")
                 currentTime = CreateObject("roLongInteger")
                 currentTime.SetLongInt(date.asSeconds())
                 return (currentTime * 1000) + date.getMilliseconds()
             end function,
 
-            GetTimeInSeconds : function() as longinteger
+            GetTimeInSeconds: function() as longinteger
                 date = CreateObject("roDateTime")
                 currentTime = CreateObject("roLongInteger")
                 currentTime.SetLongInt(date.asSeconds())
@@ -320,32 +319,31 @@ function StartBranchSdk(options as object, messagePort as object)
         return instance
     end function
 
-    CreateBranchPrintLogger = function(initParams as object) as object
-        print "CreateBranchPrintLogger"
+    CreateBranchPrintLogger = function() as object
         instance = {
-            Header : "Branch SDK",
+            Header: "Branch SDK",
 
-            warning : function(message as String) as void
+            warning: function(message as String) as void
                 m.printlog(BranchSdkConstants().LOG_LEVEL.WARNING, message)
             end function,
 
-            error : function(message as String) as void
+            error: function(message as String) as void
                 m.printlog(BranchSdkConstants().LOG_LEVEL.ERROR, message)
             end function,
 
-            info : function(message as String) as void
+            info: function(message as String) as void
                 m.printlog(BranchSdkConstants().LOG_LEVEL.INFO, message)
             end function,
 
-            debug : function(message as String) as void
+            debug: function(message as String) as void
                 m.printlog(BranchSdkConstants().LOG_LEVEL.DEBUG, message)
             end function,
 
-            all : function(message as String) as void
+            all: function(message as String) as void
                 m.printlog(BranchSdkConstants().LOG_LEVEL.ALL, message)
             end function,
 
-            printlog : function(level as integer, message as String) as void
+            printlog: function(level as integer, message as String) as void
                  if (GetBranchSdk().configuration.logLevel >= level) then
                     print "================ " m.Header " ======================"
                     print message
@@ -357,11 +355,10 @@ function StartBranchSdk(options as object, messagePort as object)
         return instance
     end function
 
-    CreateBranchConfiguration = function(options as object) as object
-        print "CreateBranchConfiguration "
+    CreateBranchConfiguration = function(initParams as object) as object
         config = BranchSdkConstants().DEFAULT_CONFIG
-        for each key in options
-            config.AddReplace(key, options[key])
+        for each key in initParams
+            config.AddReplace(key, initParams[key])
         end for
 
         if config.environment = BranchSdkConstants().ENVIRONMENT.DEVELOPMENT then
@@ -376,26 +373,26 @@ function StartBranchSdk(options as object, messagePort as object)
         return config
     end function
 
-    CreateBranchNetworking = function(initParams as object, messagePort as object) as object
+    CreateBranchNetworking = function(messagePort as object) as object
         instance = {
-            messagePort : messagePort,
-
-            pendingTransfers : {},
-            messageQueue : [],
+            messagePort: messagePort,
+            pendingTransfers: {},
+            messageQueue: [],
             apiLocalTimeout: 10, ' In Seconds
             apiMaxRetries: 2,
 
-            queueMessage : function(message as object)
+            queueMessage: function(message as object)
                 m.messageQueue.push(message)
-                print "MessageQueue Count : " m.messageQueue.Count()
+                branchPrintLogger = GetBranchSdk().logger
+                branchPrintLogger.info("MessageQueue Count : " + m.messageQueue.Count().tostr())
                 m.processUploads()
             end function,
 
-            processUploads : function()
+            processUploads: function()
                 if (m.messageQueue.Count() > 0) then
-                    branchPrintLogger = GetBranchSdk().logger
                     deviceLinkStatus = CreateObject("roDeviceInfo").GetLinkStatus()
                     if (not deviceLinkStatus) then
+                        branchPrintLogger = GetBranchSdk().logger
                         branchPrintLogger.error("No active network connection - deferring upload.")
                         return -1
                     end if
@@ -407,9 +404,10 @@ function StartBranchSdk(options as object, messagePort as object)
                 end if
             end function,
 
-            uploadRequest : function (reqMsg as object)
+            uploadRequest: function (reqMsg as object)
+                branchPrintLogger = GetBranchSdk().logger
                 if (reqMsg = invalid or reqMsg.endPoint = invalid) then
-                    print "Invalid url received : Ignoring    "
+                    branchPrintLogger.error("Invalid url received! Message ignored.")
                     return false
                 end if
 
@@ -433,24 +431,21 @@ function StartBranchSdk(options as object, messagePort as object)
                 urlTransfer.AddHeader("Content-Type","application/json")
                 urlTransfer.RetainBodyOnError(true)
 
-                printLogger = GetBranchSdk().logger
-                ' printLogger.debug("Uploading req: " + reqJson)
                 urlTransfer.setPort(m.messagePort)
-                print "Calling API (" requestId ") ===> " urlTransfer.GetUrl()
-                print "===> Request data (" requestId ") : " reqJson
+                branchPrintLogger.debug("Calling API (" + requestId.tostr() + ") : " + urlTransfer.GetUrl())
+                branchPrintLogger.debug("Request data (" + requestId.tostr() + ") : " + reqJson)
                 urlTransfer.AsyncPostFromString(reqJson)
             end function,
 
-            handleUrlEvent : function(urlEvent as object)
-                print "BranchNetworking handleUrlEvent: " urlEvent
+            handleUrlEvent: function(urlEvent as object)
+                branchPrintLogger = GetBranchSdk().logger
                 responseObject = invalid
                 if (urlEvent <> invalid)
                     requestId = urlEvent.GetSourceIdentity().ToStr()
                     sourceMessage = m.pendingTransfers[requestId]
 
-                    printLogger = GetBranchSdk().logger
                     if (sourceMessage = invalid)
-                        printLogger.debug("Unknown event received... Source message not found!!!")
+                        branchPrintLogger.debug("Unknown event received... Source message not found!")
                     else
                         m.pendingTransfers.delete(requestId)
 
@@ -458,19 +453,12 @@ function StartBranchSdk(options as object, messagePort as object)
                         responseBody = urlEvent.GetString()
                         failureReason = urlEvent.GetFailureReason()
 
-                        ' HBTODO: TEST
-                        ' responseCode = 504
-
-                        ' HBTODO: TEST
-                        ' responseBody = FormatJson({"error": {"message":"Invalid or missing app id, Branch key, or secret","code":400}})
-
-                        ' printLogger.debug("Response: code " + str(responseCode) + " body: " + responseBody)
-                        print "<=== Response (" requestId ") : " responseBody
-                        print "<=== Response errorCode (" requestId ") : " responseCode
-                        print "<=== Response failureReason (" requestId ") : " failureReason
+                        branchPrintLogger.debug("Response (" + requestId.tostr() + ") : " + responseBody)
+                        branchPrintLogger.debug("Response errorCode (" + requestId.tostr() + ") : " + responseCode.tostr())
+                        branchPrintLogger.debug("Response failureReason (" + requestId.tostr() + ") : " + failureReason)
 
                         if (responseCode = 200) then
-                            if (responseBody <> invalid and responseBody <> invalid) then
+                            if (responseBody <> invalid and responseBody <> "") then
                                 responseObject = parsejson(responseBody)
                                 if (responseObject <> invalid) then
                                     registry = GetBranchSdk().registry
@@ -481,7 +469,7 @@ function StartBranchSdk(options as object, messagePort as object)
                                         ' jsonResponse = responseObject
                                         ' jsonResponse.message =
                                     else
-                                        print "sourceMessage.request.method : " sourceMessage.request.method
+                                        branchPrintLogger.info("Processing response method : " + sourceMessage.request.method)
                                         if (sourceMessage.request.method = "initSession") then
                                             if (responseObject.DoesExist("device_fingerprint_id")) then
                                                 registry.setDeviceFingerprintId(responseObject.device_fingerprint_id)
@@ -516,11 +504,10 @@ function StartBranchSdk(options as object, messagePort as object)
                         else
                             if (responseCode = 503 or responseCode = 504 or responseCode = 408) then 'API Timeout 408 and 504
                                 if (sourceMessage.request.message.retryNumber < m.apiMaxRetries) then
+                                    branchPrintLogger.info("Server Timeout. Retry Number : " + sourceMessage.request.message.retryNumber.tostr())
                                     sourceMessage.request.message.retryNumber++
-                                    print "Server Timeout Retry : " sourceMessage.request.message
                                     m.messageQueue.unshift(sourceMessage.request)
                                 else
-                                    ' error = FormatJson({"error": {"message":"API Timeout","code":responseCode}})
                                     if (responseBody <> invalid and responseBody <> "") then
                                         responseObject = parsejson(responseBody)
                                     else ' Remove relevant wait field as timeout retries are finished
@@ -536,39 +523,34 @@ function StartBranchSdk(options as object, messagePort as object)
                             else
                                 ' HBTODO: Discuss about this case for whether to keep or remove from the queue, to increase retryNumber or not
                                 m.messageQueue.unshift(sourceMessage.request)
-                                printLogger.error("Unknown error while performing upload.")
+                                branchPrintLogger.error("Unknown error while performing upload.")
                             end if
                         end if
-
                     end if
                 else
-                    print "*** Warning *** Invalid urlEvent!!!"
+                    branchPrintLogger.warning("*** Warning *** Invalid urlEvent!")
                 end if
 
                 return responseObject
             end function,
 
-            processTimeOutMessages : function()
+            processTimeOutMessages: function()
+                branchPrintLogger = GetBranchSdk().logger
                 pendingTransferCount = m.pendingTransfers.count()
                 utilities = GetBranchSdk().utils
                 currentTime = utilities.GetTimeInSeconds()
                 if (pendingTransferCount > 0) then
-                    print "currentTime : " currentTime
+                    branchPrintLogger.info("Processing timed out messages count : " + pendingTransferCount.tostr())
                     for each pendingReqId in m.pendingTransfers
-                        print "pendingReqId : " pendingReqId
                         pendingReq = m.pendingTransfers[pendingReqId]
-                        print "pendingReq : " pendingReq
-                        print "pendingReq.sentTime : " pendingReq.sentTime
                         if ((currentTime - pendingReq.sentTime) > m.apiLocalTimeout) then
                             requestId = pendingReq.requester.GetIdentity().ToStr()
                             m.pendingTransfers.delete(requestId)
-                            print "sourceMessage.req1 : " pendingReq.request.message
                             if (pendingReq.request.message.retryNumber < m.apiMaxRetries) then
                                 pendingReq.request.message.retryNumber++
-                                print "Local Timeout Retry : : " pendingReq.request.message
                                 m.messageQueue.unshift(pendingReq.request)
                             else
-                                print "*** Error *** No more retries to do for this request!!!"
+                                branchPrintLogger.error("*** Error *** No more retries to do for this request!")
                             end if
                         end if
                     end for
@@ -584,17 +566,9 @@ function StartBranchSdk(options as object, messagePort as object)
         'Registry Section = Prefix + BranchKey + ChannelId
         appInfo = CreateObject("roAppInfo")
         registryNamePrefix = "BranchSdk_registry"
-        branchKey = ""
-        if (initParams.DoesExist("branchKey") and type(initParams.branchKey) <> "roString" and initParams.branchKey <> "") then
-            branchKey = initParams.branchKey
-        end if
+        branchKey = initParams.branchKey
 
-        sectionName = registryNamePrefix
-        if (initParams.branchKey <> invalid) then
-            sectionName = sectionName + "_" + initParams.branchKey
-        end if
-
-        sectionName = sectionName + "_" + appInfo.getid()
+        sectionName = registryNamePrefix + "_" + branchKey + "_" + appInfo.getid()
         registry.keys = {
             MAIN_SECTION_PREFIX: registryNamePrefix
             SECTION_NAME: sectionName,
@@ -604,7 +578,7 @@ function StartBranchSdk(options as object, messagePort as object)
             SESSION_ID: "session_id"
             IS_FIRST_TIME: "isFirstTime"
         }
-        print "registry.keys.SECTION_NAME : " registry.keys.SECTION_NAME
+        print "Branch SDK registy section name : " + registry.keys.SECTION_NAME
         registry.section = CreateObject("roRegistrySection", registry.keys.SECTION_NAME)
 
         registry.printAll = function() as void
@@ -725,9 +699,7 @@ function StartBranchSdk(options as object, messagePort as object)
     end function
 
     CreateBranchApplicationInfo = function() as object
-        print "CreateBranchApplicationInfo : "
         if (m.BranchSdkAppInfo = invalid) then
-            print "Creating Branch ApplicationInfo : "
             appInfo = CreateObject("roAppInfo")
             devInfo = CreateObject("roDeviceInfo")
 
@@ -749,9 +721,7 @@ function StartBranchSdk(options as object, messagePort as object)
     end function
 
     CreateBranchDeviceInfo = function() as object
-        print "CreateBranchDeviceInfo : "
         if (m.collectedDeviceInfo = invalid) then
-            print "Creating Branch DeviceInformation : "
             info = CreateObject("roDeviceInfo")
             m.BranchSdkDeviceInfo = {
                 Model:                info.GetModel(),
@@ -827,6 +797,59 @@ function StartBranchSdk(options as object, messagePort as object)
             return msg
         end function,
 
+        GetHandleInputModel: function(inputArgs = {}, endPoint = "", callbackField = "", callbackFunc = "") as object
+            branchSdkInstance = GetBranchSdk()
+            appInfo = branchSdkInstance.appInfo
+            deviceInfo = branchSdkInstance.deviceInfo
+            registry = branchSdkInstance.registry
+            params = branchSdkInstance.params
+            configuration = branchSdkInstance.configuration
+            sdkConstants = BranchSdkConstants().SDKCONSTANTS
+
+            isFirstTime = registry.getIsFirstTime()
+            message = {}
+            message.branch_key = configuration.branchKey
+            message.app_version = appInfo.AppVersion
+            message.os = sdkConstants.OS_NAME
+            message.os_version = appInfo.OsVersion
+            message.retryNumber = 0
+            message.brand = sdkConstants.BRAND_NAME
+            message.model = deviceInfo.Model
+            message.sdk = sdkConstants.SDK_NAME
+            message.sdk_version = sdkConstants.SDK_VERSION
+            message.screen_height = deviceInfo.DisplaySize.h
+            message.screen_width = deviceInfo.DisplaySize.w
+            message.ad_tracking_enabled = deviceInfo.IsAddTrackingEnabled
+
+            devFingerprint = registry.getDeviceFingerprintId()
+            if (devFingerprint <> invalid and devFingerprint <> "") then
+                message.device_fingerprint_id = devFingerprint
+            end if
+
+            identityId = registry.getIdentityId()
+            if (identityId <> invalid and identityId <> "") then
+                message.identity_id = identityId
+            end if
+
+            advertising_ids = {}
+            advertising_ids.roku_rida = deviceInfo.Rida
+            message.advertising_ids = advertising_ids
+
+            if (inputArgs <> invalid) then
+                message.launch_options = inputArgs
+            end if
+
+            msg = {
+                message: message,
+                endPoint: endPoint,
+                method: "handleInput",
+                callbackField: callbackField,
+                callbackFunc: callbackFunc
+            }
+
+            return msg
+        end function,
+
         GetIdentityModel: function(developer_identity = "", endPoint = "", callbackField = "", callbackFunc = "") as object
             sdkConstants = BranchSdkConstants().SDKCONSTANTS
             branchSdkInstance = GetBranchSdk()
@@ -872,7 +895,6 @@ function StartBranchSdk(options as object, messagePort as object)
                 callbackFunc: callbackFunc
             }
 
-            ' print "branchSdkApiRequestModels GetIdentityModel model : " msg
             return msg
         end function,
 
@@ -886,7 +908,7 @@ function StartBranchSdk(options as object, messagePort as object)
 
             message = {}
             message.name = name
-            message.customer_event_alias = customer_event_alias 'BranchSdkConstants().
+            message.customer_event_alias = customer_event_alias
             message.branch_key = configuration.branchKey
 
             user_data = {}
@@ -935,7 +957,6 @@ function StartBranchSdk(options as object, messagePort as object)
                 callbackFunc: callbackFunc
             }
 
-            ' print "branchSdkApiRequestModels GetUserEventModel model :" msg
             return msg
         end function,
 
@@ -984,14 +1005,12 @@ function StartBranchSdk(options as object, messagePort as object)
                 callbackFunc: callbackFunc
             }
 
-            ' print "branchSdkApiRequestModels GetLogoutModel model : " msg
             return msg
         end function,
     }
 
     ' Place to perform startup process after Branch Sdk initialized
-    branchSdkStartupTasks = function(options as object)
-        print "branchSdkStartupTasks : "
+    branchSdkStartupTasks = function()
         ' HBTODO: TEST
         registry = GetBranchSdk().registry
         ' registry.clearAll()
@@ -1003,11 +1022,10 @@ function StartBranchSdk(options as object, messagePort as object)
     '
     branchSdkApi = {
         setPreinstallData: function(campaign = "", partner = "") as void
-                                print "branchSdkApi : setPreinstallData "
                                 registry = GetBranchSdk().registry
                                 isFirstTime = registry.getIsFirstTime()
 
-                                print "branchSdkApi : setPreinstallData isFirstTime " isFirstTime
+                                m.logger.debug("branchSdkApi : setPreinstallData isFirstTime " + isFirstTime.tostr())
                                 if (isFirstTime) then
                                     params = GetBranchSdk().params
                                     params.AddReplace("preinstall_campaign", campaign)
@@ -1037,10 +1055,10 @@ function StartBranchSdk(options as object, messagePort as object)
         logout:             function(callbackField = "", callbackFunc = "") as void
                                 m.sendMessageInQueue(m.requestModels.GetLogoutModel(BranchSdkConstants().API_URLS.logoutUrl, callbackField, callbackFunc))
                             end function,
-
+        handleInput:        function(inputArgs = {}, callbackField = "", callbackFunc = "") as void
+                                m.sendMessageInQueue(m.requestModels.GetHandleInputModel(inputArgs, BranchSdkConstants().API_URLS.handleInputUrl, callbackField, callbackFunc))
+                            end function,
         sendMessageInQueue: function(message as object) as void
-                                branchPrintLogger = GetBranchSdk().logger
-                                branchPrintLogger.debug("Sending message in Queue")
                                 m.networking.queueMessage(message)
                             end function,
         onUrlEvent:         function(urlEvent as object)
@@ -1057,28 +1075,37 @@ function StartBranchSdk(options as object, messagePort as object)
     }
 
     branchSdkApi.append({
-        utils:          CreateBranchUtilities(options),
-        logger:         CreateBranchPrintLogger(options),
+        utils:          CreateBranchUtilities(),
+        logger:         CreateBranchPrintLogger(),
         configuration:  CreateBranchConfiguration(options),
-        networking:     CreateBranchNetworking(options, messagePort),
+        networking:     CreateBranchNetworking(messagePort),
         registry:       CreateBranchRegistryManager(options),
         appInfo:        CreateBranchApplicationInfo(),
         deviceInfo:     CreateBranchDeviceInfo(),
         params:         {}
     })
     getGlobalAA().branchSdkInstance = branchSdkApi
-    branchSdkStartupTasks(options)
-end function
+    branchSdkStartupTasks()
+end sub
 
 ' Use an instance of this class to make calls to Branch SDK API's in ROKU Scene Graph Applications
 function CreateBranchSdkForSceneGraphApp() as object
-    print "CreateBranchSdkForSceneGraphApp : "
-    task = createObject("roSGNode","branchSdkTask")
+    if (m.global.branchSdkConfig = invalid) then
+        print "*** BranchSDK Error *** : Branch configuration is not set."
+        return invalid
+    end if
+
+    initParams = m.global.branchSdkConfig
+    if (not initParams.DoesExist("branchKey") or type(initParams.branchKey) <> "roString" or initParams.branchKey = "") then
+        print "*** BranchSDK Error *** : BranchKey is not configured."
+        return invalid
+    end if
+
+    task = createObject("roSGNode", "branchSdkTask")
     return {
-        callbackCounter:    99997,
+        callbackCounter:    1,
         branchSdkTask:      task,
         setPreinstallData:  function(campaign = "", partner = "") as void
-                                print "CreateBranchSdkForSceneGraphApp setPreinstallData : "
                                 m.invokeFunction("setPreinstallData", [campaign, partner])
                             end function,
         initSession:        function(uri = "", callbackFunc = "") as void
@@ -1097,12 +1124,11 @@ function CreateBranchSdkForSceneGraphApp() as object
                                 callbackField = m.setCallbackField(callbackFunc)
                                 m.invokeFunction("logout", [callbackField, callbackFunc])
                             end function,
-        logMessage:         function(message as object) as void
-                                print "CreateBranchSdkForSceneGraphApp logMessage : "
-                                m.invokeFunction("logMessage", [message])
+        handleInput:        function(inputArgs = {}, callbackFunc = "") as void
+                                callbackField = m.setCallbackField(callbackFunc)
+                                m.invokeFunction("handleInput", [inputArgs, callbackField, callbackFunc])
                             end function,
         upload:             function() as void
-                                print "CreateBranchSdkForSceneGraphApp upload : "
                                 m.invokeFunction("upload", [])
                             end function,
         setCallbackField:   function(callbackFunc as string) as string
@@ -1115,7 +1141,6 @@ function CreateBranchSdkForSceneGraphApp() as object
                                 m.branchSdkTask.observeField(callbackField, callbackFunc)
                                 return callbackField
                             end function,
-
         invokeFunction:     function(name as string, args)
                                 invocation = {}
                                 invocation.methodName = name
@@ -1123,5 +1148,4 @@ function CreateBranchSdkForSceneGraphApp() as object
                                 m.branchSdkTask[BranchSdkConstants().TASK_EVENT_FIELDS.CALL_BRANCH_API] = invocation
                             end function
      }
-
 end function

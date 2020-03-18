@@ -14,26 +14,29 @@
           </LayoutGroup>
 
           <LayoutGroup translation = "[710, 420]" layoutDirection = "vert" >
-              <Button id="bClearRegistry" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="Clear Registry" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bClearRegistry" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="Clear Registry" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bPrintRegistry" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="Print Registry" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bPrintRegistry" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="Print Registry" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bInitSession" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="InitSession" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bInitSession" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="InitSession" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bSetIdentity" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="SetIdentity" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bSetIdentity" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="SetIdentity" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bLogEventPurchase" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="LogEventPurchase" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bLogEventPurchase" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="LogEventPurchase" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bLogEventCustom" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="LogEventCustom" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bLogEventCustom" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="LogEventCustom" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
-              <Button id="bLogout" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500">
-                  <Label text="Logout" horizAlign="center" vertAlign="center" width="500" height="90" Color="#000000FF" />
+              <Button id="bHandleInput" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="HandleInput" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
+              </Button>
+              <Button id="bLogout" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label text="Logout" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>
             </LayoutGroup>
         </Group>
