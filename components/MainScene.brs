@@ -4,20 +4,21 @@ sub init()
     m.bClearRegistry.observeField("buttonSelected", "ClearRegistry_Clicked")
     m.bPrintRegistry = m.top.findNode("bPrintRegistry")
     m.bPrintRegistry.observeField("buttonSelected", "PrintRegistry_Clicked")
-    m.bInitSession = m.top.findNode("bInitSession")
-    m.bInitSession.observeField("buttonSelected", "InitSession_Clicked")
+    ' m.bInitSession = m.top.findNode("bInitSession")
+    ' m.bInitSession.observeField("buttonSelected", "InitSession_Clicked")
     m.bSetIdentity = m.top.findNode("bSetIdentity")
     m.bSetIdentity.observeField("buttonSelected", "SetIdentity_Clicked")
     m.bLogEventPurchase = m.top.findNode("bLogEventPurchase")
     m.bLogEventPurchase.observeField("buttonSelected", "LogEventPurchase_Clicked")
     m.bLogEventCustom = m.top.findNode("bLogEventCustom")
     m.bLogEventCustom.observeField("buttonSelected", "LogEventCustom_Clicked")
-    m.bHandleInput = m.top.findNode("bHandleInput")
-    m.bHandleInput.observeField("buttonSelected", "HandleInput_Clicked")
+    ' m.bHandleInput = m.top.findNode("bHandleInput")
+    ' m.bHandleInput.observeField("buttonSelected", "HandleInput_Clicked")
     m.bLogout = m.top.findNode("bLogout")
     m.bLogout.observeField("buttonSelected", "Logout_Clicked")
 
-    m.bInitSession.setFocus(true)
+    ' m.bInitSession.setFocus(true)
+    m.bSetIdentity.setFocus(true)
 
     print "MainScene : Initializing"
     print "MainScene : Creating CreateBranchSdkForSceneGraphApp"
@@ -26,13 +27,16 @@ sub init()
     m.branchSdkObj = CreateBranchSdkForSceneGraphApp()
     if (m.branchSdkObj = invalid) then
         ShowMessageDialog("Failed to initialize Branch SDK!")
-    end if
-
-    if (m.branchSdkObj <> invalid) then
+    else
         print "MainScene : setPreinstallData"
         ' BRANCH SDK INTEGRATION - Call API'
         m.branchSdkObj.setPreinstallData("MyCampaign", "MyPartner")
+        InitSession_Clicked()
     end if
+
+    m.InputEventTask = createObject("roSgNode", "InputEventTask")
+    m.InputEventTask.observefield("inputEventData", "OnInputEventDataReceived")
+    m.InputEventTask.control = "RUN"
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
@@ -43,32 +47,32 @@ function onKeyEvent(key as string, press as boolean) as boolean
             if (m.bClearRegistry.hasFocus() = true) then
                 m.bPrintRegistry.setFocus(true)
             else if (m.bPrintRegistry.hasFocus() = true) then
-                m.bInitSession.setFocus(true)
-            else if (m.bInitSession.hasFocus() = true) then
+            '     m.bInitSession.setFocus(true)
+            ' else if (m.bInitSession.hasFocus() = true) then
                 m.bSetIdentity.setFocus(true)
             else if (m.bSetIdentity.hasFocus() = true) then
                 m.bLogEventPurchase.setFocus(true)
             else if (m.bLogEventPurchase.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
-                m.bHandleInput.setFocus(true)
-            else if (m.bHandleInput.hasFocus() = true) then
+            '     m.bHandleInput.setFocus(true)
+            ' else if (m.bHandleInput.hasFocus() = true) then
                 m.bLogout.setFocus(true)
             end if
 
             return true
         else if (key = "up") then
             if (m.bLogout.hasFocus() = true) then
-                m.bHandleInput.setFocus(true)
-            else if (m.bHandleInput.hasFocus() = true) then
+            '     m.bHandleInput.setFocus(true)
+            ' else if (m.bHandleInput.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
                 m.bLogEventPurchase.setFocus(true)
             else if (m.bLogEventPurchase.hasFocus() = true) then
                 m.bSetIdentity.setFocus(true)
             else if (m.bSetIdentity.hasFocus() = true) then
-                m.bInitSession.setFocus(true)
-            else if (m.bInitSession.hasFocus() = true) then
+            '     m.bInitSession.setFocus(true)
+            ' else if (m.bInitSession.hasFocus() = true) then
                 m.bPrintRegistry.setFocus(true)
             else if (m.bPrintRegistry.hasFocus() = true) then
                 m.bClearRegistry.setFocus(true)
@@ -204,8 +208,13 @@ function OnInitSessionCallbackFunc(event as object) as void
     message = "API Succeeded!"
     if (data.error <> invalid)
         message = "API Error!"
+    else
+        if (m.global.launchArgs = invalid) then
+            ShowMessageDialog("initSession" + " " + message)
+        else
+            HandleInput_Clicked()
+        end if
     end if
-    ShowMessageDialog("initSession" + " " + message)
 end function
 
 function OnSetIdentityCallbackFunc(event as object) as void
@@ -241,6 +250,7 @@ end function
 function OnHandleInputCallbackFunc(event as object) as void
     data = event.GetData()
     print "OnHandleInputCallbackFunc: " data
+    m.global.launchArgs = invalid
     message = "API Succeeded!"
     if (data.error <> invalid)
         message = "API Error!"
@@ -272,3 +282,25 @@ sub InformationDialog_ButtonSelected(event as dynamic)
     index = event.GetData()
     m.top.getscene().dialog.close = true
 end sub
+
+sub OnInputEventDataReceived(event as dynamic)
+    data = event.GetData()
+    if (data <> invalid) then
+        ' BRANCH SDK INTEGRATION - Call API'
+        m.branchSdkObj.handleInput(data, "OnHandleInputEventCallbackFunc")
+    else
+        ShowMessageDialog("Please provide deepLinking arguments!")
+    end if
+end sub
+
+function OnHandleInputEventCallbackFunc(event as object) as void
+    data = event.GetData()
+    print "OnHandleInputEventCallbackFunc: " data
+    m.InputEventTask.inputEventData = invalid
+
+    message = "API Succeeded!"
+    if (data.error <> invalid)
+        message = "API Error!"
+    end if
+    ShowMessageDialog("handleInput" + " " + message)
+end function
