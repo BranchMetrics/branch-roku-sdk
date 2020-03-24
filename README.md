@@ -52,8 +52,8 @@ This section describes steps to integrate Branch Roku SDK into your Roku SceneGr
 
 ## Required Library files
 
-1. BranchSdkLibrary.brs 
-2. BranchSdkTask.xml 
+1. BranchSdkLibrary.brs
+2. BranchSdkTask.xml
 3. BranchSdkTask.brs
 
 Within the `input` folder, there is a test app as well as the required Branch SDK files. The Branch SDK files are:
@@ -99,7 +99,7 @@ sub ConfigureBranchSdk(screen as dynamic)
     options.logLevel = BranchSdkConstants().LOG_LEVEL.ALL
     options.environment = BranchSdkConstants().ENVIRONMENT.PRODUCTION
 
-    ' Set Branch SDK congiguration parameter as required
+    ' Set Branch SDK configuration parameter as required
     screen.getGlobalNode().addFields({branchSdkConfig: options})
 end sub
 ```
@@ -127,7 +127,7 @@ m.branchSdkObj = CreateBranchSdkForSceneGraphApp()
 
 You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/input/components/MainScene.brs#L25).
 
-4. Now do first API call which is InitSession like following: 
+4. Now do first API call which is InitSession like following:
 
 ```
 m.branchSdkObj.initSession("your_branch_key_value", "", "OnInitSessionCallbackFunc")
@@ -155,7 +155,7 @@ You can test basic deep linking using the method in the previous section, `Provi
 
 ### Identifying users
 
-As with other Branch SDKs, you can use your own user identifiers to make session and conversion event tracking easier. 
+As with other Branch SDKs, you can use your own user identifiers to make session and conversion event tracking easier.
 
 ```
 m.branchSdkObj.SetIdentity("UserUniqueNameOrID", "OnSetIdentityCallbackFunc")
