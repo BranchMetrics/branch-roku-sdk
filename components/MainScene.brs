@@ -134,7 +134,7 @@ sub InitSession_Clicked()
 
     print "Calling Branch InitSession API"
     ' BRANCH SDK INTEGRATION - Call API'
-    m.branchSdkObj.initSession("https://something.app.link/a-link", "OnInitSessionCallbackFunc")
+    m.branchSdkObj.initSession("https://something.app.link/a-link", m.global.launchArgs, "OnInitSessionCallbackFunc")
 end sub
 
 sub SetIdentity_Clicked()
@@ -209,11 +209,7 @@ function OnInitSessionCallbackFunc(event as object) as void
     if (data.error <> invalid)
         message = "API Error!"
     else
-        if (m.global.launchArgs = invalid) then
-            ShowMessageDialog("initSession" + " " + message)
-        else
-            HandleInput_Clicked()
-        end if
+        ShowMessageDialog("initSession" + " " + message)
     end if
 end function
 
