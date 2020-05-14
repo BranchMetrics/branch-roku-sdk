@@ -68,7 +68,7 @@ Within the `input` folder, there is a test app as well as the required Branch SD
         └── BranchSdkLibrary.brs
 ```
 
-## Steps for putting Branch SDK files into your SceneGraph application:
+## Steps for putting Branch SDK files into your SceneGraph application (required)
 
 *TL;DR:* copy the three Branch SDK files from the section above into your own project.
 
@@ -81,9 +81,7 @@ application
 4. Copy both the `BranchSdkTask.xml` and `BranchSdkTask.brs` files into your project's new
 `tasks` folder
 
-## Steps for integration into your application code files:
-
-### Configuring Branch
+## Configuring Branch (required)
 
 1. Open the `Main.brs` file of your project which functions as the entry point of SceneGraph application.
 2. Inside the `sub Main()`, add the following line: `ConfigureBranchSdk(screen)` (example [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/source/Main.brs#L9))
@@ -106,7 +104,7 @@ Then be sure to replace `key_live_TODO_YOUR_BRANCH_KEY_HERE` with your Branch Ke
 
 You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/source/Main.brs#L28-L37).
 
-### Initializing Branch
+## Initializing Branch (required)
 
 1. Open your file which extends `Scene`, let say its `MainScene.xml` file.
 2. Add new script file path of `BranchSdkLibrary.brs`
@@ -135,11 +133,9 @@ You can see an example of this code [here](https://github.com/BranchMetrics/bran
 
 That's it! Now Roku session count tracking should function, and you'll start to see Roku installs and opens tracked on the Branch Dashboard!
 
-### Providing info for attribution, deep linking
+## Deep Linking and Attribution (required)
 
-#### Sending up deep link data
-
-There are two primary ways in which links can trigger the Roku app to respond. Here are curls that indicate the format of these links:
+There are two primary ways in which links can trigger the Roku app to respond. Here are curls that indicate the format of these links, which you can modify and use for testing:
 
 1. `/launch/{channel}`
 ```
@@ -161,12 +157,9 @@ m.branchSdkObj.handleInput(data, "OnHandleInputEventCallbackFunc")
 
 Then you can receive deep link data back from Branch's servers, similar to any other Branch SDK. You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L171) and [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L274).
 
+Be sure to discuss your use cases for deep linking and attribution with a Branch team member.
 
-### Deep linking
-
-You can test basic deep linking using the method in the previous section, `Providing info for attribution on the backend`. However, let's discuss any concrete use cases you have, like linking from App 1 to App 2. Please initiate a conversation with derrick@branch.io.
-
-### Identifying users
+## Identifying users (optional)
 
 As with other Branch SDKs, you can use your own user identifiers to make session and conversion event tracking easier.
 
@@ -176,7 +169,7 @@ m.branchSdkObj.SetIdentity("YOUR_USER_ID_HERE", "OnSetIdentityCallbackFunc")
 
 You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L136).
 
-### Event tracking
+## Event tracking (optional)
 
 To log standard Branch events, such as purchases, you can invoke the following:
 
@@ -196,7 +189,7 @@ m.branchSdkObj.logEvent("Example Custom Event Name", "", "", "", 0, "OnLogEventC
 
 You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L158)
 
-### Preinstall tracking
+## Preinstall tracking (optional)
 
 If your app is preinstalled on Roku devices, for builds distributed to Roku, you should invoke the following method.
 
@@ -211,7 +204,7 @@ m.branchSdkObj.setPreinstalldata("MyCampaign", "MyPartner")
 
 You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L29).
 
-### Logging out users
+## Logging out users (optional)
 
 If the current user logs out of your app, you can notify Branch of this by invoking logout.
 
