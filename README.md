@@ -159,7 +159,8 @@ In both cases, please send up the data (contentId, mediaType, and any other quer
 m.branchSdkObj.handleInput(data, "OnHandleInputEventCallbackFunc")
 ```
 
-Then you can receive deep link data back from Branch's servers, similar to any other Branch SDK.
+Then you can receive deep link data back from Branch's servers, similar to any other Branch SDK. You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L171) and [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L274).
+
 
 ### Deep linking
 
