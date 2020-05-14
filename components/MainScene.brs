@@ -4,16 +4,12 @@ sub init()
     m.bClearRegistry.observeField("buttonSelected", "ClearRegistry_Clicked")
     m.bPrintRegistry = m.top.findNode("bPrintRegistry")
     m.bPrintRegistry.observeField("buttonSelected", "PrintRegistry_Clicked")
-    ' m.bInitSession = m.top.findNode("bInitSession")
-    ' m.bInitSession.observeField("buttonSelected", "InitSession_Clicked")
     m.bSetIdentity = m.top.findNode("bSetIdentity")
     m.bSetIdentity.observeField("buttonSelected", "SetIdentity_Clicked")
     m.bLogEventPurchase = m.top.findNode("bLogEventPurchase")
     m.bLogEventPurchase.observeField("buttonSelected", "LogEventPurchase_Clicked")
     m.bLogEventCustom = m.top.findNode("bLogEventCustom")
     m.bLogEventCustom.observeField("buttonSelected", "LogEventCustom_Clicked")
-    ' m.bHandleInput = m.top.findNode("bHandleInput")
-    ' m.bHandleInput.observeField("buttonSelected", "HandleInput_Clicked")
     m.bLogout = m.top.findNode("bLogout")
     m.bLogout.observeField("buttonSelected", "Logout_Clicked")
 
@@ -47,32 +43,24 @@ function onKeyEvent(key as string, press as boolean) as boolean
             if (m.bClearRegistry.hasFocus() = true) then
                 m.bPrintRegistry.setFocus(true)
             else if (m.bPrintRegistry.hasFocus() = true) then
-            '     m.bInitSession.setFocus(true)
-            ' else if (m.bInitSession.hasFocus() = true) then
                 m.bSetIdentity.setFocus(true)
             else if (m.bSetIdentity.hasFocus() = true) then
                 m.bLogEventPurchase.setFocus(true)
             else if (m.bLogEventPurchase.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
-            '     m.bHandleInput.setFocus(true)
-            ' else if (m.bHandleInput.hasFocus() = true) then
                 m.bLogout.setFocus(true)
             end if
 
             return true
         else if (key = "up") then
             if (m.bLogout.hasFocus() = true) then
-            '     m.bHandleInput.setFocus(true)
-            ' else if (m.bHandleInput.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
                 m.bLogEventPurchase.setFocus(true)
             else if (m.bLogEventPurchase.hasFocus() = true) then
                 m.bSetIdentity.setFocus(true)
             else if (m.bSetIdentity.hasFocus() = true) then
-            '     m.bInitSession.setFocus(true)
-            ' else if (m.bInitSession.hasFocus() = true) then
                 m.bPrintRegistry.setFocus(true)
             else if (m.bPrintRegistry.hasFocus() = true) then
                 m.bClearRegistry.setFocus(true)
@@ -134,7 +122,7 @@ sub InitSession_Clicked()
 
     print "Calling Branch InitSession API"
     ' BRANCH SDK INTEGRATION - Call API'
-    m.branchSdkObj.initSession("https://something.app.link/a-link", "OnInitSessionCallbackFunc")
+    m.branchSdkObj.initSession(m.global.launchArgs, "OnInitSessionCallbackFunc")
 end sub
 
 sub SetIdentity_Clicked()
@@ -209,11 +197,7 @@ function OnInitSessionCallbackFunc(event as object) as void
     if (data.error <> invalid)
         message = "API Error!"
     else
-        if (m.global.launchArgs = invalid) then
-            ShowMessageDialog("initSession" + " " + message)
-        else
-            HandleInput_Clicked()
-        end if
+        ShowMessageDialog("initSession" + " " + message)
     end if
 end function
 

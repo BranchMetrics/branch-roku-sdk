@@ -736,7 +736,7 @@ sub StartBranchSdk(options as object, messagePort as object)
 
     ' Branch SDK API request models
     branchSdkApiRequestModels = {
-        GetInitSessionModel: function(uri = "", endPoint = "", callbackField = "", callbackFunc = "") as object
+        GetInitSessionModel: function(inputArgs = {}, endPoint = "", callbackField = "", callbackFunc = "") as object
             branchSdkInstance = GetBranchSdk()
             appInfo = branchSdkInstance.appInfo
             deviceInfo = branchSdkInstance.deviceInfo
@@ -757,7 +757,6 @@ sub StartBranchSdk(options as object, messagePort as object)
                 end if
             end if
 
-            message.uri = uri
             message.branch_key = configuration.branchKey
             message.app_version = appInfo.AppVersion
             message.os = sdkConstants.OS_NAME
@@ -784,6 +783,10 @@ sub StartBranchSdk(options as object, messagePort as object)
             advertising_ids = {}
             advertising_ids.roku_rida = deviceInfo.Rida
             message.advertising_ids = advertising_ids
+
+            if (inputArgs <> invalid) then
+                message.launch_options = inputArgs
+            end if
 
             msg = {
                 message: message,
@@ -1033,8 +1036,8 @@ sub StartBranchSdk(options as object, messagePort as object)
                                 end if
                             end function,
 
-        initSession:        function(uri = "", callbackField = "", callbackFunc = "") as void
-                                m.sendMessageInQueue(m.requestModels.GetInitSessionModel(uri, BranchSdkConstants().API_URLS.sessionUrl, callbackField, callbackFunc))
+        initSession:        function(inputArgs = {}, callbackField = "", callbackFunc = "") as void
+                                m.sendMessageInQueue(m.requestModels.GetInitSessionModel(inputArgs, BranchSdkConstants().API_URLS.sessionUrl, callbackField, callbackFunc))
                             end function,
 
         setIdentity:        function(developer_identity = "", callbackField = "", callbackFunc = "") as void
@@ -1108,9 +1111,9 @@ function CreateBranchSdkForSceneGraphApp() as object
         setPreinstallData:  function(campaign = "", partner = "") as void
                                 m.invokeFunction("setPreinstallData", [campaign, partner])
                             end function,
-        initSession:        function(uri = "", callbackFunc = "") as void
+        initSession:        function(inputArgs = {}, callbackFunc = "") as void
                                 callbackField = m.setCallbackField(callbackFunc)
-                                m.invokeFunction("initSession", [uri, callbackField, callbackFunc])
+                                m.invokeFunction("initSession", [inputArgs, callbackField, callbackFunc])
                             end function,
         setIdentity:           function(developer_identity = "", callbackFunc = "") as void
                                 callbackField = m.setCallbackField(callbackFunc)
