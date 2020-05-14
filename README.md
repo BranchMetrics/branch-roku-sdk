@@ -123,15 +123,15 @@ You can see an example of this code [here](https://github.com/BranchMetrics/bran
 m.branchSdkObj = CreateBranchSdkForSceneGraphApp()
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L27).
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L23).
 
 4. Now do first API call which is InitSession like following:
 
 ```
-m.branchSdkObj.initSession("", "OnInitSessionCallbackFunc")
+m.branchSdkObj.initSession(m.global.launchArgs, "OnInitSessionCallbackFunc")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L137). An example of the callback function can be found [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L200-L218)
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L125). An example of the callback function can be found [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L188-L202)
 
 That's it! Now Roku session count tracking should function, and you'll start to see Roku installs and opens tracked on the Branch Dashboard!
 
@@ -161,18 +161,6 @@ m.branchSdkObj.handleInput(data, "OnHandleInputEventCallbackFunc")
 
 Then you can receive deep link data back from Branch's servers, similar to any other Branch SDK.
 
-#### Forcing a test of deep linking
-
-To test out attribution, you can modify the initSession call to include a Branch link:
-
-```
-m.branchSdkObj.initSession("https://something.app.link/a-link", "OnInitSessionCallbackFunc")
-```
-
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L137).
-
-Be sure to remove this link before pushing to production.
-
 ### Deep linking
 
 You can test basic deep linking using the method in the previous section, `Providing info for attribution on the backend`. However, let's discuss any concrete use cases you have, like linking from App 1 to App 2. Please initiate a conversation with derrick@branch.io.
@@ -185,7 +173,7 @@ As with other Branch SDKs, you can use your own user identifiers to make session
 m.branchSdkObj.SetIdentity("YOUR_USER_ID_HERE", "OnSetIdentityCallbackFunc")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L148).
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L136).
 
 ### Event tracking
 
@@ -195,7 +183,7 @@ To log standard Branch events, such as purchases, you can invoke the following:
 m.branchSdkObj.logEvent(BranchSdkConstants().EVENT_TYPE.PURCHASE, "Example customer_event_alias", "transaction_id", "USD", 99.99, "OnLogEventPurchaseCallbackFunc")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L159).
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L147).
 
 NOTE: Refer to 'Branch SDK Standard Event List' section in the [BranchSdkLibrary.brs](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/source/libs/BranchSdkLibrary.brs#L57-L82) file for all available predefined EVENT_TYPE values.
 
@@ -205,7 +193,7 @@ You can also log custom events by invoking the following:
 m.branchSdkObj.logEvent("Example Custom Event Name", "", "", "", 0, "OnLogEventCustomCallbackFunc")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L170)
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L158)
 
 ### Preinstall tracking
 
@@ -220,7 +208,7 @@ Replace `MyPartner` with a $3p value, which will then appear in the Branch Dashb
 m.branchSdkObj.setPreinstalldata("MyCampaign", "MyPartner")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L33).
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L29).
 
 ### Logging out users
 
@@ -230,4 +218,4 @@ If the current user logs out of your app, you can notify Branch of this by invok
 m.branchSdkObj.logout("OnLogoutCallbackFunc")
 ```
 
-You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L197).
+You can see an example of this code [here](https://github.com/BranchMetrics/branch-roku-sdk/blob/master/components/MainScene.brs#L185).
