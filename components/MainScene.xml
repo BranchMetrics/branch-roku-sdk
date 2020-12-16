@@ -35,6 +35,9 @@
               <!-- <Button id="bHandleInput" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
                   <Label text="HandleInput" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button> -->
+              <Button id="bTracking" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
+                  <Label id="lTracking" text="" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
+              </Button>
               <Button id="bLogout" text="" iconUri="" focusedIconUri="" MinWidth="500" MaxWidth="500" height="75">
                   <Label text="Logout" horizAlign="center" vertAlign="center" width="500" height="65" Color="#000000FF" />
               </Button>

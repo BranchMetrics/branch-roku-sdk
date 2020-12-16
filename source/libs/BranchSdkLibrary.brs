@@ -50,7 +50,8 @@ function BranchSdkConstants() as object
     }
 
     TASK_EVENT_FIELDS = {
-        CALL_BRANCH_API: "callBranchApi",
+        CALL_BRANCH_API:        "callBranchApi",
+        BRANCH_LIB_RESPONSE:    "branchLibResponse"
     }
 
     ' Branch SDK Standard Event List'
@@ -292,7 +293,7 @@ end function
 ' Initialize Branch SDK as per your required configuration parameters
 ' See BranchSdkConstants().DEFAULT_CONFIG for other available configuration parameters
 '
-sub StartBranchSdk(options as object, messagePort as object)
+sub StartBranchSdk(options as object, task as object, messagePort as object)
     if (getGlobalAA().branchSdkInstance <> invalid) then
         branchPrintLogger = GetBranchSdk().logger
         branchPrintLogger.info("StartBranchSdk called more then once.")
@@ -399,7 +400,12 @@ sub StartBranchSdk(options as object, messagePort as object)
 
                     while (m.messageQueue.count() > 0)
                         nextUpload = m.messageQueue.shift()
-                        m.uploadRequest(nextUpload)
+                        if GetBranchSdk().localstate.isTrackingDisabled
+                            nextUpload.response = {error: "Branch SDK: Tracking disabled!"}
+                            GetBranchSdk().task[BranchSdkConstants().TASK_EVENT_FIELDS.BRANCH_LIB_RESPONSE] = nextUpload
+                        else
+                            m.uploadRequest(nextUpload)
+                        end if
                     end while
                 end if
             end function,
@@ -572,11 +578,11 @@ sub StartBranchSdk(options as object, messagePort as object)
         registry.keys = {
             MAIN_SECTION_PREFIX: registryNamePrefix
             SECTION_NAME: sectionName,
-            DEVELOPER_IDENTITY: "developer_identity",
-            DEVICE_FINGERPRINT_ID: "device_fingerprint_id",
-            IDENTITY_ID: "identity_id",
-            SESSION_ID: "session_id"
-            IS_FIRST_TIME: "isFirstTime"
+            DEVELOPER_IDENTITY:     "developer_identity",
+            DEVICE_FINGERPRINT_ID:  "device_fingerprint_id",
+            IDENTITY_ID:            "identity_id",
+            SESSION_ID:             "session_id",
+            IS_FIRST_TIME:          "isFirstTime"
         }
         print "Branch SDK registy section name : " + registry.keys.SECTION_NAME
         registry.section = CreateObject("roRegistrySection", registry.keys.SECTION_NAME)
@@ -1036,6 +1042,12 @@ sub StartBranchSdk(options as object, messagePort as object)
                                 end if
                             end function,
 
+        disableTracking: function(isDisable as boolean) as void
+                                localState = GetBranchSdk().localState
+                                m.logger.debug("branchSdkApi : disableTracking isDisable " + isDisable.tostr())
+                                localState.isTrackingDisabled = isDisable
+                            end function,
+
         initSession:        function(inputArgs = {}, callbackField = "", callbackFunc = "") as void
                                 m.sendMessageInQueue(m.requestModels.GetInitSessionModel(inputArgs, BranchSdkConstants().API_URLS.sessionUrl, callbackField, callbackFunc))
                             end function,
@@ -1078,6 +1090,7 @@ sub StartBranchSdk(options as object, messagePort as object)
     }
 
     branchSdkApi.append({
+        task:           task,
         utils:          CreateBranchUtilities(),
         logger:         CreateBranchPrintLogger(),
         configuration:  CreateBranchConfiguration(options),
@@ -1085,7 +1098,8 @@ sub StartBranchSdk(options as object, messagePort as object)
         registry:       CreateBranchRegistryManager(options),
         appInfo:        CreateBranchApplicationInfo(),
         deviceInfo:     CreateBranchDeviceInfo(),
-        params:         {}
+        params:         {},
+        localState:     {isTrackingDisabled: false}
     })
     getGlobalAA().branchSdkInstance = branchSdkApi
     branchSdkStartupTasks()
@@ -1110,6 +1124,9 @@ function CreateBranchSdkForSceneGraphApp() as object
         branchSdkTask:      task,
         setPreinstallData:  function(campaign = "", partner = "") as void
                                 m.invokeFunction("setPreinstallData", [campaign, partner])
+                            end function,
+        disableTracking:    function(isDisable as boolean) as void
+                                m.invokeFunction("disableTracking", [isDisable])
                             end function,
         initSession:        function(inputArgs = {}, callbackFunc = "") as void
                                 callbackField = m.setCallbackField(callbackFunc)
