@@ -10,6 +10,9 @@ sub init()
     m.bLogEventPurchase.observeField("buttonSelected", "LogEventPurchase_Clicked")
     m.bLogEventCustom = m.top.findNode("bLogEventCustom")
     m.bLogEventCustom.observeField("buttonSelected", "LogEventCustom_Clicked")
+    m.bTracking = m.top.findNode("bTracking")
+    m.lTracking = m.top.findNode("lTracking")
+    m.bTracking.observeField("buttonSelected", "Tracking_Clicked")
     m.bLogout = m.top.findNode("bLogout")
     m.bLogout.observeField("buttonSelected", "Logout_Clicked")
 
@@ -33,6 +36,18 @@ sub init()
     m.InputEventTask = createObject("roSgNode", "InputEventTask")
     m.InputEventTask.observefield("inputEventData", "OnInputEventDataReceived")
     m.InputEventTask.control = "RUN"
+
+    m.IsTracking = true
+    SetTrackingButtonText()
+end sub
+
+sub SetTrackingButtonText()
+    if m.IsTracking
+        text = "Disable Tracking"
+    else
+        text = "Enable Tracking"
+    end if
+    m.lTracking.text = text
 end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
@@ -49,12 +64,16 @@ function onKeyEvent(key as string, press as boolean) as boolean
             else if (m.bLogEventPurchase.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
+                m.bTracking.setFocus(true)
+            else if (m.bTracking.hasFocus() = true) then
                 m.bLogout.setFocus(true)
             end if
 
             return true
         else if (key = "up") then
             if (m.bLogout.hasFocus() = true) then
+                m.bTracking.setFocus(true)
+            else if (m.bTracking.hasFocus() = true) then
                 m.bLogEventCustom.setFocus(true)
             else if (m.bLogEventCustom.hasFocus() = true) then
                 m.bLogEventPurchase.setFocus(true)
@@ -172,6 +191,19 @@ sub HandleInput_Clicked()
     else
         ShowMessageDialog("Please provide deepLinking arguments!")
     end if
+end sub
+
+sub Tracking_Clicked()
+    if (m.branchSdkObj = invalid) then
+        ShowMessageDialog("Branch SDK is not initialized!")
+        return
+    end if
+
+    print "Calling Branch Tracking API"
+    ' BRANCH SDK INTEGRATION - Call API'
+    m.branchSdkObj.disableTracking(m.IsTracking)
+    m.IsTracking = not m.IsTracking
+    SetTrackingButtonText()
 end sub
 
 sub Logout_Clicked()

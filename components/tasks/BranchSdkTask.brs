@@ -6,13 +6,14 @@
 sub init()
     m.port = createObject("roMessagePort")
     m.top.observeField("callBranchApi", m.port)
+    m.top.observeField("branchLibResponse", m.port)
     m.top.functionName = "setupApiLoop"
     m.top.control = "RUN"
 end sub
 
 sub setupApiLoop()
     options = m.global.branchSdkConfig
-    StartBranchSdk(options, m.port)
+    StartBranchSdk(options, m.top, m.port)
     m.branchSdkInstance = GetBranchSdk()
     m.branchPrintLogger = GetBranchSdk().logger
     while true
@@ -29,6 +30,11 @@ sub setupApiLoop()
             if mt = "roSGNodeEvent"
                 if msg.getField()=BranchSdkConstants().TASK_EVENT_FIELDS.CALL_BRANCH_API
                     executeBranchApi(msg.getData())
+                else if msg.getField()=BranchSdkConstants().TASK_EVENT_FIELDS.BRANCH_LIB_RESPONSE
+                    data = msg.getData()
+                    m.top[data.callbackfield] = data.response
+                    m.top.unobserveField(data.callbackField)
+                    m.top.removeField(data.callbackField)
                 end if
             ' Event for API response
             else if (mt = "roUrlEvent")

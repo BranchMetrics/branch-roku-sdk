@@ -6,6 +6,7 @@
     <script type="text/brightscript" uri="pkg:/source/libs/BranchSdkLibrary.brs"/>
 
     <interface>
-        <field id="callBranchApi" type="assocarray"/>
+        <field id="callBranchApi"       type="assocarray"/>
+        <field id="branchLibResponse"   type="assocarray"/>
     </interface>
 </component>
