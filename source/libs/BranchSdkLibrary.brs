@@ -79,6 +79,8 @@ function BranchSdkConstants() as object
         LOGIN:                  "LOGIN",
         SUBSCRIBE:              "SUBSCRIBE",
         START_TRIAL:            "START_TRIAL",
+        INITIATE_STREAM:        "INITIATE_STREAM",
+        COMPLETE_STREAM:        "COMPLETE_STREAM",
         OTHER:                  "OTHER"
     }
 
